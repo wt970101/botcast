@@ -59,8 +59,8 @@ async def check_weather():
                             if content == "。":
                                 content = "無"
                         elif "燈" in paragraphs[i] and "號" in paragraphs[i]:
-                            for p in range(len(paragraphs[i])):
-                                if paragraphs[i][p] == "燈" and paragraphs[p+1] == "號":
+                            for p in range(len(paragraphs[i])-1):
+                                if paragraphs[i][p] == "燈" and paragraphs[i][p+1] == "號":
                                     break
                             p = p + 1
                             title = paragraphs[i][p-3:p+1]

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import tasks, commands
-from bot.modules import eq_information
+from bot.modules import earthquake
 from dotenv import load_dotenv
 import os
 import traceback
@@ -20,11 +20,11 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @tasks.loop(minutes=4)
 async def check_earthquake():
     try:
-        new_eq = eq_information.get_data()
-        previous_eq = eq_information.load_latest()
+        new_eq = earthquake.get_data()
+        previous_eq = earthquake.load_latest()
 
-        if eq_information.compare_data(previous_eq, new_eq):
-            eq_information.save_new(new_eq)
+        if earthquake.compare_data(previous_eq, new_eq):
+            earthquake.save_new(new_eq)
             channel = bot.get_channel(CHANNEL_ID)
             if channel:
                 embed = discord.Embed(

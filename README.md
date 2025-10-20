@@ -1,1 +1,2 @@
 "# eqcast" 
+"# botcast" 

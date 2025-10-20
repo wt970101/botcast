@@ -6,9 +6,14 @@ from selenium.webdriver.chrome.service import Service
 
 def get_url():
     url = f"https://www.cwa.gov.tw/V8/C/P/Warning/FIFOWS.html"
-    service = Service(r"C:\MyApps\earthquake\bot\driver\chromedriver.exe")
+    service = Service(r"C:\MyApps\earthquake\broadcast\bot\driver\chromedriver.exe")
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # 背景執行
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox") # 停用沙箱模式(避免權限不足)
+    options.add_argument("--disable-dev-shm-usage") # 停用 /dev/shm 的共享記憶體機制 (強制使用 /tmp，避免網頁卡死)
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-software-rasterizer")
+    options.add_argument("--window-size=1920,1080") # 設定視窗大小 (虛擬螢幕解析度)
     browser = webdriver.Chrome(service=service, options=options)
 
     browser.get(url)
@@ -23,9 +28,14 @@ def get_url():
 
 def get_data(link):
     url = f"https://www.cwa.gov.tw/{link}"
-    service = Service(r"C:\MyApps\earthquake\bot\driver\chromedriver.exe")
+    service = Service(r"C:\MyApps\earthquake\broadcast\bot\driver\chromedriver.exe")
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # 背景執行
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox") # 停用沙箱模式(避免權限不足)
+    options.add_argument("--disable-dev-shm-usage") # 停用 /dev/shm 的共享記憶體機制 (強制使用 /tmp，避免網頁卡死)
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-software-rasterizer")
+    options.add_argument("--window-size=1920,1080") # 設定視窗大小 (虛擬螢幕解析度)
     browser = webdriver.Chrome(service=service, options=options)
 
     browser.get(url)

@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.service import Service
 
 def get_data():
     url = f"https://www.cwa.gov.tw/V8/C/E/index.html"
-    service = Service(r"C:\MyApps\earthquake\bot\driver\chromedriver.exe")
+    service = Service(r"C:\MyApps\earthquake\broadcast\bot\driver\chromedriver.exe")
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox") # 停用沙箱模式(避免權限不足)

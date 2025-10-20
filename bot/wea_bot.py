@@ -54,20 +54,17 @@ async def check_weather():
 
                     else:
                         if "【" in paragraphs[i] and "】" in paragraphs[i]:
-                            embed.add_field(name=title, value=content, inline=False)
                             title = paragraphs[i].split("【")[1].split("】")[0]
                             content = paragraphs[i].split("】")[1]
                             if content == "。":
                                 content = "無"
                         elif "燈" in paragraphs[i] and "號" in paragraphs[i]:
-                            embed.add_field(name=title, value=content, inline=False)
                             for p in range(len(paragraphs[i])):
                                 if paragraphs[i][p] == "燈" and paragraphs[p+1] == "號":
                                     break
                             p = p + 1
                             title = paragraphs[i][p-3:p+1]
                         elif "：" in paragraphs[i]:
-                            embed.add_field(name=title, value=content, inline=False)
                             title, content = paragraphs[i].split("：",1)
                         else:
                             title = ""

@@ -65,6 +65,6 @@
 ## 📸 範例畫面
 > 地震速報與氣象警報範例（Embed 格式）
 > 
-> ![螢幕擷取畫面 2025-10-21 230431](https://hackmd.io/_uploads/ryLLPtICeg.png)
-![螢幕擷取畫面 2025-10-21 230452](https://hackmd.io/_uploads/S1UUwY8Rgl.png)
+> ![地震警報訊息](https://github.com/wt970101/botcast/blob/main/photo/%E5%9C%B0%E9%9C%87%E8%AD%A6%E5%A0%B1%E8%A8%8A%E6%81%AF.png)
+> ![氣象警報訊息](https://github.com/wt970101/botcast/blob/main/photo/%E6%B0%A3%E8%B1%A1%E8%AD%A6%E5%A0%B1%E8%A8%8A%E6%81%AF.png)
 

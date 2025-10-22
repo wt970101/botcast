@@ -48,7 +48,7 @@ async def check_weather():
                     if paragraphs[i][0] in ["一","二","三","四","五","六","七","八","九","十"] and paragraphs[i][1] in ["、","．"]:
                         paragraphs[i] = paragraphs[i][2:]
 
-                
+                    
                     if i == 0:
                         embed.add_field(name="📌 概述", value=paragraphs[0], inline=False)
 
@@ -68,7 +68,7 @@ async def check_weather():
                             title, content = paragraphs[i].split("：",1)
                         else:
                             title = ""
-                            content = f"{content}\n {paragraphs[i]}"
+                            content = f"{paragraphs[i]}"
                         embed.add_field(name=title, value=content, inline=False)
 
                 # footer 可加來源或更新時間

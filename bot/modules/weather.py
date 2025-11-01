@@ -1,68 +1,121 @@
 import json
-import time, re, urllib.parse
+import time
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+import asyncio
+from functools import partial
 
-def get_url():
-    url = f"https://www.cwa.gov.tw/V8/C/P/Warning/FIFOWS.html"
-    service = Service(r"C:\MyApps\earthquake\broadcast\bot\driver\chromedriver.exe")
+CHROME_DRIVER_PATH = r"C:\MyApps\earthquake\broadcast\bot\driver\chromedriver.exe"
+
+# --- 同步抓取函數 (原本同步 Selenium) ---
+def _get_city_weather(num):
+    url = f"https://www.cwa.gov.tw/V8/C/W/County/County.html?CID={num}"
+    service = Service(CHROME_DRIVER_PATH)
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
-    options.add_argument("--no-sandbox") # 停用沙箱模式(避免權限不足)
-    options.add_argument("--disable-dev-shm-usage") # 停用 /dev/shm 的共享記憶體機制 (強制使用 /tmp，避免網頁卡死)
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-software-rasterizer")
-    options.add_argument("--window-size=1920,1080") # 設定視窗大小 (虛擬螢幕解析度)
+    options.add_argument("--window-size=1920,1080")
     browser = webdriver.Chrome(service=service, options=options)
-
     browser.get(url)
     time.sleep(0.2)
     bsoup = BeautifulSoup(browser.page_source, 'html.parser')
+    browser.quit()
 
-    warn = bsoup.find('div', {'class', "warn-list"})
+    # 日期
+    date_list = [th.get_text() for th in bsoup.find_all('th', {'scope': 'col'})[:7]]
+
+    tbody = bsoup.find('tbody')
+
+    # 解析行
+    def parse_row(tr_class, span_class):
+        tr = tbody.find('tr', {'class': tr_class})
+        row = []
+        for td in tr.find_all('td'):
+            s = td.find('span', {'class': span_class})
+            row.append(s.get_text() if s else "—")
+        return row
+
+    daytime_tem = parse_row('day', 'tem-C is-active')
+    night_tem = parse_row('night', 'tem-C is-active')
+    feel_tr = tbody.find('tr', {'id': 'lo-temp'})
+    feel_like_tem = [td.find('span', {'class': 'tem-C is-active'}).get_text() for td in feel_tr.find_all('td')]
+    ultra_tr = tbody.find('tr', {'id': 'ultra'})
+    ultraviolet = [td.find('span', {'class': 'sr-only'}).get_text() for td in ultra_tr.find_all('td')]
+
+    data = []
+    for i in range(7):
+        data.append([date_list[i], daytime_tem[i], night_tem[i], feel_like_tem[i], ultraviolet[i]])
+    return data
+
+# --- 非同步封裝 ---
+async def get_city_weather(num):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, partial(_get_city_weather, num))
+
+# 同步抓取最新警報 URL
+def _get_url():
+    url = "https://www.cwa.gov.tw/V8/C/P/Warning/FIFOWS.html"
+    service = Service(CHROME_DRIVER_PATH)
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-software-rasterizer")
+    options.add_argument("--window-size=1920,1080")
+    browser = webdriver.Chrome(service=service, options=options)
+    browser.get(url)
+    time.sleep(0.2)
+    bsoup = BeautifulSoup(browser.page_source, 'html.parser')
+    browser.quit()
+
+    warn = bsoup.find('div', {'class': "warn-list"})
     a_tag = warn.find("a")
-    href_value = a_tag["href"]
+    return a_tag["href"]
 
-    return href_value
+async def get_url():
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, _get_url)
 
-def get_data(link):
+# 同步抓取警報內容
+def _get_data(link):
     url = f"https://www.cwa.gov.tw/{link}"
-    service = Service(r"C:\MyApps\earthquake\broadcast\bot\driver\chromedriver.exe")
+    service = Service(CHROME_DRIVER_PATH)
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
-    options.add_argument("--no-sandbox") # 停用沙箱模式(避免權限不足)
-    options.add_argument("--disable-dev-shm-usage") # 停用 /dev/shm 的共享記憶體機制 (強制使用 /tmp，避免網頁卡死)
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-software-rasterizer")
-    options.add_argument("--window-size=1920,1080") # 設定視窗大小 (虛擬螢幕解析度)
+    options.add_argument("--window-size=1920,1080")
     browser = webdriver.Chrome(service=service, options=options)
-
     browser.get(url)
     time.sleep(0.2)
     bsoup = BeautifulSoup(browser.page_source, 'html.parser')
+    browser.quit()
 
     title = bsoup.find('h2', {'class': "main-title"}).get_text().strip()
     datetime = bsoup.find('span', {'class': 'datetime'}).get_text().strip()
     content = bsoup.find('p', {'id': "WarnContent"}).get_text().strip()
 
-    new_wea = {
-        "title": title,
-        "time": datetime,
-        "content": content
-        }
+    return {"title": title, "time": datetime, "content": content}
 
-    return new_wea
+async def get_data(link):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, partial(_get_data, link))
 
-# 讀取上一次天氣警報
+# 讀取/儲存最新警報
 def load_latest():
     try:
         with open("latest_wea.json", "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
         return None
-    
-# 儲存最新天氣警報
+
 def save_new(new_wea):
     with open("latest_wea.json", "w", encoding="utf-8") as f:
         json.dump(new_wea, f, ensure_ascii=False, indent=2)
@@ -75,12 +128,10 @@ def compare_data(previous_wea, new_wea):
         print(f"{formatted_time} 發現新氣象並且更新資料")
         return True
     print(f"{formatted_time} 沒有發現新氣象資料")
-    # print(new_wea)
     return False
 
+# 測試
 if __name__ == '__main__':
-    link = get_url()
-    data = get_data(link)
-
-    for row in data:
-        print(row)
+    import asyncio
+    data = asyncio.run(get_city_weather("09020"))
+    print(data)

@@ -109,6 +109,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+firebase-dbkey.json
 
 # Spyder project settings
 .spyderproject
@@ -134,3 +135,7 @@ templates/document/*.pdf
 templates/document/*.docx
 templates/document/*.xlsx
 templates/scraper/*.html
+
+# data
+latest_eq.josn
+latest_wea.josn

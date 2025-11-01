@@ -73,25 +73,6 @@ class MAINDB():
         achild = self.ref.child(f'discord_weather/{discord_id}')
         return achild.get()
 
-"""
-[
-    {
-        'date': '11/01'
-        'temp1':?,
-        'temp2':?,
-        'temp3':?
-        'level':? 
-    },
-    {
-        'date': '11/0ㄉ'
-        'temp1':?,
-        'temp2':?,
-        'temp3':?
-        'level':? 
-    },
-]
-""" 
-
 if __name__ == '__main__':
     # object(物件) vs. class(類別)
     # instance(實體) vs. blueprint(設計藍圖)

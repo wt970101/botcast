@@ -2,7 +2,7 @@ import asyncio
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse
 import uvicorn
-
+import amaindb
 # 修改前提：bot.eq_bot 與 bot.wea_bot 裡的 run_bot 函式要改成非阻塞
 # 也就是用 await bot.start(TOKEN) 而非 bot.run(TOKEN)
 import bot.eq_bot
@@ -14,6 +14,16 @@ app = FastAPI()
 @app.get("/", response_class=HTMLResponse)
 async def login_page():
     html_content = """"""
+    return html_content
+
+@app.get("/weather_report/{ID}", response_class=HTMLResponse)
+async def weather_report(ID):
+    mainDB = amaindb.MAINDB()
+    result = mainDB.weather_data_read(ID)
+    print(result)
+    html_content = ""
+    for adict in result:
+        html_content += f"<p>{adict['date']}</p>"
     return html_content
 
 # API 

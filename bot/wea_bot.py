@@ -17,14 +17,15 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="？", intents=intents)
 
-city = {"基隆市": "10017", "新北市": "65", "台北市": "63", "桃園市": "68", "新竹市": "10018", "新竹縣": "10004", "苗栗縣": "10005", "台中市": "66",
+citys = {"基隆市": "10017", "新北市": "65", "台北市": "63", "桃園市": "68", "新竹市": "10018", "新竹縣": "10004", "苗栗縣": "10005", "台中市": "66",
         "彰化縣": "10007", "南投縣": "10008", "雲林縣": "10009", "嘉義市": "10020", "嘉義縣": "10010", "台南市": "67", "高雄市": "64", "屏東縣": "10013",
         "宜蘭縣": "10002", "花蓮縣": "10015", "台東縣": "10014", "澎湖縣": "10016", "連江縣": "09020", "金門縣": "09007"}
 
 class WeatherComboView(discord.ui.View):
     def __init__(self):
         super().__init__()
-        self.city_code = None
+        self.citys_code = None
+        self.city_name = None
         self.add_item(WeatherSelect())
         self.add_item(WeatherButton())
 
@@ -32,32 +33,19 @@ class WeatherComboView(discord.ui.View):
 class WeatherSelect(discord.ui.Select):
     def __init__(self):
         options = [
-            discord.SelectOption(label=ci) for ci in city
+            discord.SelectOption(label=ci) for ci in citys
         ]
         super().__init__(placeholder="選擇要查詢的縣市", min_values=1, max_values=1, options=options)
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.send_message(f"已選擇 {self.values[0]}，按下查詢按鈕並稍等片刻後即可獲得資訊", ephemeral=True)
-        self.city_code = city[self.values[0]]
+        self.citys_code = citys[self.values[0]]
         
     
 class WeatherButton(discord.ui.Button):
     def __init__(self):
         super().__init__(style=discord.ButtonStyle.primary, label="查詢最新天氣 🌦️")
-
-    def format_weather_table(self, data):
-        # 建立表格字串
-        table = "日期        | 白天氣溫 | 夜晚氣溫 | 體感溫度 | 紫外線\n"
-        table += "-----------|---------|---------|---------|---------\n"
-        for row in data:
-            table += f"{row[0]:<10}| {row[1]:<8}| {row[2]:<8}| {row[3]:<8}| {row[4]:<8}\n"
-        return f"```\n{table}```"
     
-    def format_table(self, data):
-        massage = None
-        for row in data:
-            massage = (f"# {row[0]}\n 白天氣溫: {row[1]}    夜晚氣溫：{row[2]}")
-        return massage
     async def callback(self, interaction: discord.Interaction):
         view: WeatherComboView = self.view
         select: WeatherSelect = view.children[0]
@@ -68,19 +56,16 @@ class WeatherButton(discord.ui.Button):
         # await interaction.response.send_message("加載中請稍後", ephemeral=True)
 
         city_name = select.values[0]
-        code = city[city_name]
+        # self.set_city_name(city_name)
+        # print("city_name", self.get_city_name())
+        code = citys[city_name]
 
-        print("開始蒐集資料")
         # 告訴 Discord 我收到互動
         await interaction.response.defer(ephemeral=True)
-        print("收到縣市氣象資料")
 
         try:
             data = await weather.get_city_weather(code)
-            massage = ""
-            for row in data:
-                massage = massage + f"## {row[0]}\n **白天氣溫： {row[1]}**    **夜晚氣溫：{row[2]}**\n **體感溫度：{row[3]}**\n **紫外線：{row[4]}**\n\n"
-            massage = "http://localhost:8000/weather_report/123"
+            massage = f"點擊 [連結](http://localhost:8000/weather_report/123) 查看 {city_name} 未來一周天氣預報]"
             await interaction.followup.send(content=massage, ephemeral=True)
             print("結束工作")
 

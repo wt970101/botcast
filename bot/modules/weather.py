@@ -8,7 +8,7 @@ from functools import partial
 
 CHROME_DRIVER_PATH = r"C:\MyApps\earthquake\broadcast\bot\driver\chromedriver.exe"
 
-# --- 同步抓取函數 (原本同步 Selenium) ---
+# --- 同步抓取函數 ---
 def _get_city_weather(num):
     url = f"https://www.cwa.gov.tw/V8/C/W/County/County.html?CID={num}"
     service = Service(CHROME_DRIVER_PATH)

@@ -1,6 +1,9 @@
 import asyncio
+from fastapi import Request
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+
 import uvicorn
 import amaindb
 # 修改前提：bot.eq_bot 與 bot.wea_bot 裡的 run_bot 函式要改成非阻塞
@@ -9,6 +12,7 @@ import bot.eq_bot
 import bot.wea_bot
 
 app = FastAPI()
+templates = Jinja2Templates(directory="template")
 
 # 個人網站登入頁面
 @app.get("/", response_class=HTMLResponse)
@@ -17,14 +21,14 @@ async def login_page():
     return html_content
 
 @app.get("/weather_report/{ID}", response_class=HTMLResponse)
-async def weather_report(ID):
+async def weather_report(request: Request, ID: str):
     mainDB = amaindb.MAINDB()
-    result = mainDB.weather_data_read(ID)
-    print(result)
-    html_content = ""
-    for adict in result:
-        html_content += f"<p>{adict['date']}</p>"
-    return html_content
+    weather_city = bot.wea_bot.WeatherButton()
+    data = mainDB.weather_data_read(ID)
+    print(data)
+    # return templates.TemplateResponse("weather.html", {"request": request, "data": data, "city": weather_city.get_city_name()})
+    return templates.TemplateResponse("weather.html", {"request": request, "data": data})
+
 
 # API 
 @app.get("/status")

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天氣預報</title>
+        <style>
+        body {
+            font-family: "Noto Sans TC", sans-serif;
+            background: #f9fafb;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            width: 600px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        thead th {
+            background-color: #4a90e2;
+            color: white;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f7fd;
+        }
+
+        tbody tr:hover {
+            background-color: #e6f2ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>未來一周天氣預報</h1>
+    <h2> {{city}}</h2>
+    <table class="table-basic" style="width:600px;border:1px solid #ddd;">
+        <thead>
+            <tr>
+                <th rowspan="2">日期</th>
+                <th colspan="2">天氣</th>
+                <th rowspan="2">體感溫度</th>
+                <th rowspan="2">紫外線</th>
+            </tr>
+            <tr>
+                <th>白天溫度</th>
+                <th>夜晚溫度</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in data %}
+            <tr>
+                <td>{{ day.date }}</td>
+                <td>{{ day.temp1 }}</td>
+                <td>{{ day.temp2 }}</td>
+                <td>{{ day.temp3 }}</td>
+                <td>{{ day.ultraviolet }}</td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+</body>
+</html>

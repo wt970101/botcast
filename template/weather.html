@@ -4,48 +4,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>天氣預報</title>
-        <style>
+    <link rel="stylesheet" href="weather.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Noto Sans TC", "微軟正黑體", sans-serif;
+        }
+
         body {
-            font-family: "Noto Sans TC", sans-serif;
-            background: #f9fafb;
-            text-align: center;
-        }
-
-        h1 {
+            background-color: #f3f6fa;
             color: #333;
+            line-height: 1.6;
         }
 
-        table {
-            width: 600px;
+        /* === 頁首區 === */
+        header {
+            background-color: #000000;
+            color: white;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            font-size: 26px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 6px rgba(255,255,255,0.2);
+        }
+
+        /* === 主要內容區 === */
+        main {
+            padding: 30px 20px 60px 20px;
+        }
+
+        /* 城市名稱 */
+        h2 {
+            text-align: center;
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #2b5ea1;
+        }
+
+        /* 訊息框 */
+        .message {
+            background-color: #4b5d67;
+            color: #fff;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
             margin: 20px auto;
+            border-radius: 10px;
+            width: 80%;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        /* === 表格樣式 === */
+        .table-basic table {
+            width: 80%;
+            margin: 25px auto;
             border-collapse: collapse;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1);
-            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+            background-color: #fff;
         }
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
+        .table-basic th, .table-basic td {
+            border: 1px solid #e0e0e0;
+            padding: 12px 10px;
+            text-align: center;
+            font-size: 16px;
         }
 
-        thead th {
+        .table-basic thead th {
             background-color: #4a90e2;
             color: white;
+            font-weight: 600;
         }
 
-        tbody tr:nth-child(even) {
-            background-color: #f2f7fd;
+        .table-basic tbody tr:nth-child(even) {
+            background-color: #f5f9ff;
         }
 
-        tbody tr:hover {
-            background-color: #e6f2ff;
+        .table-basic tbody tr:hover {
+            background-color: #e7f0fd;
+            transition: background-color 0.2s ease;
+        }
+        .table-basic p {
+            font-size: 12px;
+            text-align: right;
+            margin-top: 8px;
+            margin-right: 12%;
         }
     </style>
 </head>
+
 <body>
+    <header>
     <h1>未來一周天氣預報</h1>
-    <h2> {{city}}</h2>
-    <table class="table-basic" style="width:600px;border:1px solid #ddd;">
+    </header>
+    
+    <main>
+    <section>
+    <h2>{{city}}</h2>
+    </section>
+
+    <section class="message">
+    <p>{{message}}</p>
+    </section>
+
+    <section class="table-basic">
+    <table>
         <thead>
             <tr>
                 <th rowspan="2">日期</th>
@@ -71,5 +146,8 @@
 
         </tbody>
     </table>
+    <p>單位： °C</p>
+    </section>
+    </main>
 </body>
 </html>

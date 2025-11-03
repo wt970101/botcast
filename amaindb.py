@@ -17,24 +17,6 @@ class MAINDB():
             pass
         self.ref = db.reference()
 
-    def test_add(self):
-        achild = self.ref.child('test-data')
-        adict = {
-            'fruit': 'fruit',
-            'vegetable': 'vegetable'
-        }
-        achild.set(adict)
-
-        dict_fruit = {
-            'a': 'apple',
-            'b': 'banana'
-        }
-        achild.child('fruit').set(dict_fruit)
-
-    def test_del(self):
-        achild = self.ref.child('test-data')
-        achild.set({})
-
     def moderator_add(self, moderator_id):
         # table
         achild = self.ref.child(f'moderators/{moderator_id}')
@@ -49,12 +31,13 @@ class MAINDB():
         achild = self.ref.child(f'moderators/{moderator_id}')
         achild.set({})
     
-    def weather_data_add(self, discord_id):
+    def weather_data_add(self, discord_id, num):
         import bot.modules.weather
-        num = "09020"
-        data = bot.modules.weather._get_city_weather(num)
-        print(data)
+        print("得到資訊並啟動爬蟲")
+        data, city, message = bot.modules.weather._get_city_weather(num)
         achild = self.ref.child(f'discord_weather/{discord_id}')
+
+        achild.set(message)
         adict = {}
         for i, row in enumerate(data):
             # data[i] <=> row
@@ -67,10 +50,12 @@ class MAINDB():
                 }         
             data[i] = adict
 
-        achild.set(data)
+        achild.set([city, message, data])
+        print("上傳 firebase 完畢")
 
     def weather_data_read(self, discord_id):
         achild = self.ref.child(f'discord_weather/{discord_id}')
+        print(achild.get())
         return achild.get()
 
 
@@ -85,7 +70,9 @@ if __name__ == '__main__':
     # 一類多例：用一個版本的手機設計規格書，可以產生許多支實際手機用 MAINDB 類別，
     # 可以產生許多和 mainDB 一樣的物件變數
     mainDB = MAINDB()
-    op = input("1.get_weather: ")
+    op = input("1.get_weather: 2.read_weather: ")
     if op == '1':
         mainDB.weather_data_add("123")
-    
+        print("上傳成功")
+    elif op == '2':
+        mainDB.weather_data_read("123")

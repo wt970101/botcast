@@ -5,11 +5,13 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 import asyncio
 from functools import partial
+import amaindb
 
 CHROME_DRIVER_PATH = r"C:\MyApps\earthquake\broadcast\bot\driver\chromedriver.exe"
 
 # --- 同步抓取函數 ---
 def _get_city_weather(num):
+    print("收到爬蟲資訊", num)
     url = f"https://www.cwa.gov.tw/V8/C/W/County/County.html?CID={num}"
     service = Service(CHROME_DRIVER_PATH)
     options = webdriver.ChromeOptions()
@@ -24,6 +26,11 @@ def _get_city_weather(num):
     time.sleep(0.2)
     bsoup = BeautifulSoup(browser.page_source, 'html.parser')
     browser.quit()
+
+    city = bsoup.find('h2', {'class': 'main-title'}).get_text()[-3:]
+
+    marquee = bsoup.find('a', {'class': 'marquee'}).get_text()[:-3]
+    # print(city, marquee)
 
     # 日期
     date_list = [th.get_text() for th in bsoup.find_all('th', {'scope': 'col'})[:7]]
@@ -49,7 +56,8 @@ def _get_city_weather(num):
     data = []
     for i in range(7):
         data.append([date_list[i], daytime_tem[i], night_tem[i], feel_like_tem[i], ultraviolet[i]])
-    return data
+    print("爬蟲完畢並回傳")
+    return data, city, marquee
 
 # --- 非同步封裝 ---
 async def get_city_weather(num):
@@ -133,5 +141,5 @@ def compare_data(previous_wea, new_wea):
 # 測試
 if __name__ == '__main__':
     import asyncio
-    data = asyncio.run(get_city_weather("09020"))
-    print(data)
+    data, city, massage = asyncio.run(get_city_weather("09020"))
+    print(data, city, massage)

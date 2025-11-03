@@ -4,6 +4,7 @@ from bot.modules import weather
 from dotenv import load_dotenv
 import os
 import traceback
+import amaindb
 
 # 讀取 .env 檔案
 load_dotenv()
@@ -24,11 +25,29 @@ citys = {"基隆市": "10017", "新北市": "65", "台北市": "63", "桃園市"
 class WeatherComboView(discord.ui.View):
     def __init__(self):
         super().__init__()
-        self.citys_code = None
-        self.city_name = None
         self.add_item(WeatherSelect())
         self.add_item(WeatherButton())
+        self.city_code = None
+        self.city_name = None
+        self.user_id = None
 
+    def set_user_id(self, user_id):
+        self.user_id = user_id
+    
+    def get_user_id(self):
+        return self.user_id
+    
+    def set_city_code(self, city_code):
+        self.city_code = city_code
+
+    def get_city_code(self):
+        return self.city_code
+    
+    def set_city_name(self, city_name):
+        self.city_name = city_name
+
+    def get_city_name(self):
+        return self.city_name
 
 class WeatherSelect(discord.ui.Select):
     def __init__(self):
@@ -38,10 +57,14 @@ class WeatherSelect(discord.ui.Select):
         super().__init__(placeholder="選擇要查詢的縣市", min_values=1, max_values=1, options=options)
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.send_message(f"已選擇 {self.values[0]}，按下查詢按鈕並稍等片刻後即可獲得資訊", ephemeral=True)
-        self.citys_code = citys[self.values[0]]
-        
-    
+        await interaction.response.defer(ephemeral=True)  # 告訴 Discord：我正在處理，否則三秒過後會交互失敗
+        # await interaction.response.send_message(f"已選擇 {self.values[0]}，按下查詢按鈕並稍等片刻後即可獲得資訊", ephemeral=True)
+        view: WeatherComboView = self.view # 傳入以前的 view
+        city_name = self.values[0]
+        view.set_city_name(city_name)
+        code = citys[city_name]
+        view.set_city_code(code)
+
 class WeatherButton(discord.ui.Button):
     def __init__(self):
         super().__init__(style=discord.ButtonStyle.primary, label="查詢最新天氣 🌦️")
@@ -53,20 +76,20 @@ class WeatherButton(discord.ui.Button):
         if not select.values:
             await interaction.response.send_message("請先選擇城市！", ephemeral=True)
             return
-        # await interaction.response.send_message("加載中請稍後", ephemeral=True)
-
-        city_name = select.values[0]
-        # self.set_city_name(city_name)
-        # print("city_name", self.get_city_name())
-        code = citys[city_name]
-
-        # 告訴 Discord 我收到互動
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.send_message("載入中...", ephemeral=True)
 
         try:
-            data = await weather.get_city_weather(code)
-            massage = f"點擊 [連結](http://localhost:8000/weather_report/123) 查看 {city_name} 未來一周天氣預報]"
-            await interaction.followup.send(content=massage, ephemeral=True)
+            user_id = view.get_user_id()
+            code = view.get_city_code()
+            city_name = view.get_city_name()
+
+            mainDB = amaindb.MAINDB()
+            mainDB.weather_data_add(user_id ,code) # 上傳 firebase
+            print("完成動作")
+
+            massage = f"點擊 [連結](http://localhost:8000/weather_report/{user_id}) 查看 {city_name} 未來一周天氣預報"
+            sent_message = await interaction.original_response()
+            await sent_message.edit(content=massage)
             print("結束工作")
 
         except Exception as e:
@@ -149,7 +172,10 @@ async def on_ready():
 
 @bot.command()
 async def cityweather(ctx):
+    user_id = ctx.author.id
     view = WeatherComboView() # 下拉式選單並用按鈕查詢
+    view.set_user_id(user_id)
+    print("userid2", user_id)
     await ctx.send("請選擇縣市或直接查詢最新天氣 🌦️", view=view)
     
 async def run_bot():

@@ -3,6 +3,8 @@ from fastapi import Request
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+
 
 import uvicorn
 import amaindb
@@ -12,6 +14,8 @@ import bot.eq_bot
 import bot.wea_bot
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 templates = Jinja2Templates(directory="template")
 
 # 個人網站登入頁面
@@ -24,10 +28,14 @@ async def login_page():
 async def weather_report(request: Request, ID: str):
     mainDB = amaindb.MAINDB()
     weather_city = bot.wea_bot.WeatherButton()
-    data = mainDB.weather_data_read(ID)
-    print(data)
+    data = mainDB.weather_data_read(ID) # 讀取 firebase
+    # print(data)
+    city_name = data[0]
+    message = data[1]
+    weather_data = data[2]
     # return templates.TemplateResponse("weather.html", {"request": request, "data": data, "city": weather_city.get_city_name()})
-    return templates.TemplateResponse("weather.html", {"request": request, "data": data})
+    return templates.TemplateResponse("weather.html", 
+        {"request": request, "city": city_name, "message": message, "data": weather_data})
 
 
 # API 
